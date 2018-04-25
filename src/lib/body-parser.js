@@ -3,11 +3,6 @@
 const url = require('url');
 const queryString = require('querystring');
 
-const testUrl = 'https://www.google.com/search?q=cute+cows&oq=cute+cows&aqs=chrome..69i57j0l5.1487j0j7&sourceid=chrome&ie=UTF-8';
-
-// console.log(url.parse(testUrl));
-//console.log(queryString.parse(testUrl));
-
 module.exports = function bodyParser(req) {
   return new Promise((resolve, reject) => {
     req.url = url.parse(req.url);
