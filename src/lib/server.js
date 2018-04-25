@@ -42,15 +42,29 @@ const app = http.createServer((req, res) => {
         return undefined;
       }
       if (parsedRequest.method === 'GET' && parsedRequest.url.pathname === '/api/cowsay') {
-        let cowsayText = '';
         if (parsedRequest.url.query.text) {
-          cowsayText = cowsay.say({ text: parsedRequest.url.query.text });
+          const cowsayText = cowsay.say({ text: parsedRequest.url.query.text });
           res.writeHead(200, { 'Content-Type': 'application/json' });
           res.write(`{ "content": "${cowsayText}"}`);
         } else {
           res.writeHead(400, { 'Content-Type': 'application/json' });
           res.write('{"error": "invalid request: text query required"}');
         }
+        res.end();
+        return undefined;
+      }
+      if (parsedRequest.method === 'POST' && parsedRequest.url.pathname === '/api/cowsay') {
+        if (!parsedRequest.body) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.write('{"error": "invalid request: body required"}');
+        } else if (!parsedRequest.url.query.text) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.write('{"error": "invalid request: text query required"}');
+        }
+        const cowsayText = cowsay.say({ text: parsedRequest.url.query.text });
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.write(`{ "content": "${cowsayText}"}`);
+        res.write(JSON.stringify(parsedRequest.body));
         res.end();
         return undefined;
       }
