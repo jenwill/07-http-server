@@ -20,14 +20,14 @@ const app = http.createServer((req, res) => {
         return undefined;
       }
       if (parsedRequest.method === 'GET' && parsedRequest.url.pathname === '/') {
-        const html = `<!DOCTYPE html><html><head><title> cowsay </title></head><body><header><nav><ul><li><a href="/cowsay">cowsay</a></li></ul></nav></header><main><p>This project is a very simple HTTP server by Jennifer Piper.</p><p>To see a silly cow say your message, go to localhost:3000/cowsay?text=<em>your-message</em> with your browser.</p><p>To see the silly cow say a random message, go to localhost:3000/cowsay, or follow the <strong>cowsay</strong> link above.</p></main></body></html>`;
+        const html = '<!DOCTYPE html><html><head><title> cowsay </title></head><body><header><nav><ul><li><a href="/cowsay">cowsay</a></li></ul></nav></header><main><p>This project is a very simple HTTP server by Jennifer Piper.</p><p>To see a silly cow say your message, go to localhost:3000/cowsay?text=<em>your-message</em> with your browser.</p><p>To see the silly cow say a random message, go to localhost:3000/cowsay, or follow the <strong>cowsay</strong> link above.</p></main></body></html>';
         res.writeHead(200, { 'Content-Type': 'text/html' });
         res.write(html);
         res.end();
         return undefined;
       }
       if (parsedRequest.method === 'GET' && parsedRequest.url.pathname === '/cowsay') {
-        let cowsayText = cowsay.say({ text: 'sup.' });
+        let cowsayText = '';
         if (parsedRequest.url.query.text) {
           cowsayText = cowsay.say({ text: parsedRequest.url.query.text });
         } else {
@@ -41,12 +41,31 @@ const app = http.createServer((req, res) => {
         res.end();
         return undefined;
       }
-
+      if (parsedRequest.method === 'GET' && parsedRequest.url.pathname === '/api/cowsay') {
+        let cowsayText = '';
+        if (parsedRequest.url.query.text) {
+          cowsayText = cowsay.say({ text: parsedRequest.url.query.text });
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.write(`{ "content": "${cowsayText}"}`);
+        } else {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.write('{"error": "invalid request: text query required"}');
+        }
+        res.end();
+        return undefined;
+      }
+      res.writeHead(404, { 'Content-Type': 'text/plain' });
+      res.write('NOT FOUND');
+      res.end();
+      return undefined;
+    })
+    .catch((err) => {
+      res.writeHead(400, { 'Content-Type': 'text/plain' });
+      res.write('BAD REQUEST', err);
+      res.end();
       return undefined;
     });
-  return undefined;
 });
 
 server.start = (port, callback) => app.listen(port, callback);
-// server.stop = () =>
-
+server.stop = callback => app.close(callback);
